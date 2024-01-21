@@ -141,24 +141,33 @@ void LvxFileHandle::BasePointsHandle(LivoxEthPacket *data, LvxBasePackDetail &pa
   packet.data_type = data->data_type;
   
   //fprintf (stdout, "data_type=%d\n", data->data_type);
+  
+  // PointDataType::kExtendCartesian
   if (data->data_type == 2) {
-	uint16_t x = (uint16_t)data->data[0];
-	uint16_t y = (uint16_t)data->data[2];
-	uint16_t z = (uint16_t)data->data[4];
-	uint8_t r = (uint8_t)data->data[6];
-	uint8_t tag = (uint8_t)data->data[7];
-	fprintf (stdout,"%d %d %lu (%3d,%3d,%3d) r=%3d tag=%3d rsvd=%d\n",
+	uint32_t x = (uint16_t)data->data[0];
+	uint32_t y = (uint16_t)data->data[4];
+	uint32_t z = (uint16_t)data->data[8];
+	uint8_t r = (uint8_t)data->data[12];
+	uint8_t tag = (uint8_t)data->data[13];
+	
+	/*
+	fprintf (stdout,"%d %d %lu (%5d,%5d,%5d) r=%3d tag=%3d\n",
 		data->data_type,
 		data->timestamp_type,
 		data->timestamp,
-		x,y,z,r,tag,
-		data->rsvd
+		x,y,z,r,tag
+	);
+	*/ 
+	
+	fprintf (stdout,"%5d %5d %5d %3d\n",
+		x,y,z,r,tag
 	);  
+	
   }
   
   memcpy(packet.timestamp, data->timestamp, 8 * sizeof(uint8_t));
   switch (packet.data_type) {
-    case PointDataType::kCartesian:
+    case PointDataType::kCartesian:    
        packet.pack_size = sizeof(LvxBasePackDetail) - sizeof(packet.raw_point) - \
           sizeof(packet.pack_size) + RAW_POINT_NUM*sizeof(LivoxRawPoint);
       memcpy(packet.raw_point,(void *)data->data, RAW_POINT_NUM*sizeof(LivoxRawPoint));
