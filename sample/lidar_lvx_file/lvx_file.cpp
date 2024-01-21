@@ -101,6 +101,9 @@ void LvxFileHandle::SaveFrameToLvxFile(std::list<LvxBasePackDetail> &point_packe
 
   frame_header.frame_index = cur_frame_index_;
 
+  // debugging aid
+  fprintf(stdout,"frame_header.current_offset=%lu\n", frame_header.current_offset);
+
   memcpy(write_buffer.get() + cur_pos, (void*)&frame_header, sizeof(FrameHeader));
   cur_pos += sizeof(FrameHeader);
 
@@ -136,6 +139,23 @@ void LvxFileHandle::BasePointsHandle(LivoxEthPacket *data, LvxBasePackDetail &pa
   packet.error_code = data->err_code;
   packet.timestamp_type = data->timestamp_type;
   packet.data_type = data->data_type;
+  
+  //fprintf (stdout, "data_type=%d\n", data->data_type);
+  if (data->data_type == 2) {
+	uint16_t x = (uint16_t)data->data[0];
+	uint16_t y = (uint16_t)data->data[2];
+	uint16_t z = (uint16_t)data->data[4];
+	uint8_t r = (uint8_t)data->data[6];
+	uint8_t tag = (uint8_t)data->data[7];
+	fprintf (stdout,"%d %d %lu (%3d,%3d,%3d) r=%3d tag=%3d rsvd=%d\n",
+		data->data_type,
+		data->timestamp_type,
+		data->timestamp,
+		x,y,z,r,tag,
+		data->rsvd
+	);  
+  }
+  
   memcpy(packet.timestamp, data->timestamp, 8 * sizeof(uint8_t));
   switch (packet.data_type) {
     case PointDataType::kCartesian:
